@@ -1,0 +1,9 @@
+/.idea
+/node_modules
+/config/config.json
+/migrations/.migrate
+/public
+/logs/*
+/private
+debug.log
+.vscode
