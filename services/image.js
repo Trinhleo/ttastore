@@ -22,49 +22,59 @@ module.exports = {
    widthResize : (optional) width of resize image,
  }
 */
-function uploadSingleImage(req, imageOptions, callback) {
+async function uploadSingleImage(req, imageOptions) {
     var imgFile = req.files[Object.keys(req.files)[0]];
+    console.log("img file", imgFile)
     if (!imgFile) {
-        return callback(errorConst.IMAGE.NOT_FOUND);
+        throw errorConst.IMAGE.NOT_FOUND;
     }
     // if (imageOptions.fileSizeLimits && (imgFile.size > imageOptions.fileSizeLimits)) {
     //     return callback(errorConst.IMAGE.FILE_TOO_LARGE);
     // }
     if (constant.IMAGE.IMAGE_FORMATS.indexOf(imgFile.type) === -1) {
-        return callback({
+        throw {
             errorCode: 400,
             message: errorConst.IMAGE.NOT_IMAGE_FORMAT
-        });
+        };
     }
 
     if (imageOptions.oldImagePath) {
         fs.unlink(imageOptions.oldImagePath);
     }
     // make dir and write file
-
-    fs.mkdirs(imageOptions.dir, function (err) {
-        if (err) {
-            return callback(errorConst.IMAGE.CAN_NOT_MAKE_DIR);
-        }
-        fs.readFile(imgFile.path, function (err, data) {
-            // write file to uploads/fullsize folder
-            var dateNow = Date.now();
-            var extension = getImageExtension(imgFile.type);
-            var fullFileName = dateNow + extension;
-            var fullFileNameThumnail = dateNow + '_thumb' + extension;
-            var originalPath = imageOptions.dir + '/' + fullFileName;
-            var thumbnailPath = imageOptions.dir + '/' + fullFileNameThumnail;
-            fs.writeFile(originalPath, data, function (err) {
+    return new Promise((resolve, reject) => {
+        fs.mkdirs(imageOptions.dir, function (err) {
+            if (err) {
+                return reject(err);
+            }
+            fs.readFile(imgFile.path, function (err, data) {
                 if (err) {
-                    return callback(err);
+                    return reject(err);
                 }
-                createThumbnail(originalPath, thumbnailPath, data, fullFileName, fullFileNameThumnail, callback);
+                // write file to uploads/fullsize folder
+                var dateNow = Date.now();
+                var extension = getImageExtension(imgFile.type);
+                var fullFileName = dateNow + extension;
+                var fullFileNameThumnail = dateNow + '_thumb' + extension;
+                var originalPath = imageOptions.dir + '/' + fullFileName;
+                var thumbnailPath = imageOptions.dir + '/' + fullFileNameThumnail;
+                fs.writeFile(originalPath, data, function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve({
+                        originalPath: originalPath,
+                        fullFileName: fullFileName,
+                        extension: extension
+                    });
+                    //  return   createThumbnail(originalPath, thumbnailPath, data, fullFileName, fullFileNameThumnail);
+                });
             });
         });
-    });
+    })
 }
 
-function createThumbnail(originalPath, thumbnailPath, data, fullFileName, fullFileNameThumnail, callback) {
+function createThumbnail(originalPath, thumbnailPath, data, fullFileName, fullFileNameThumnail) {
 
     // sharp(originalPath)
     //     .resize(constant.IMAGE.THUMBNAIL_WIDTH, constant.IMAGE.THUMBNAIL_HEIGHT)
@@ -111,11 +121,11 @@ function createThumbnail(originalPath, thumbnailPath, data, fullFileName, fullFi
         console.log(thumbHeight);
         image.resize(thumbWidth, thumbHeight, function (err, imageThumb) {
             if (err) {
-                return callback(err);
+                throw err;
             }
             imageThumb.writeFile(thumbnailPath, function (err, result) {
                 var imgInfo = imageInfo(fullFileName, thumbnailPath);
-                callback(null, imgInfo);
+                return imgInfo;
             })
         })
     });
@@ -145,11 +155,11 @@ function getImage(filePath, extension, returnThumbail, callback) {
     var prefixData = extension ? 'data:image/' + extension + ';base64,' : 'data:image/png;base64,';
     fs.readFile(filePath, function (err, result) {
         if (err) {
-            return callback(err);
+            throw err;
         }
         // convert binary data to base64 encoded string
         var data = new Buffer(result).toString('base64');
-        return callback(null, prefixData.concat(data));
+        return prefixData.concat(data);
     });
 }
 

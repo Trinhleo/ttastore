@@ -22,7 +22,7 @@ function validateLastName(lastName) {
 
 function validateMobileNumber(mobileNumber) {
     var numberFilter = /^[0-9]*$/;
-    return mobileNumber && mobileNumber.trim().length == 11 && numberFilter.test(mobileNumber.toString().trim());;
+    return mobileNumber && mobileNumber.trim().length > 9 && mobileNumber.trim().length < 12 && numberFilter.test(mobileNumber.toString().trim());;
 }
 
 function validatePassword(password) {

@@ -28,7 +28,8 @@ module.exports = {
         CURRENT_PASSWORD_REQUIRED: 'Current Password is required',
         USER_BLOCKED: "Contact Locovan Support",
         NEW_PASSWORD: "New Password is required",
-        DRIVER_BLOCKED: "Your account is not activated, please contact support"
+        DRIVER_BLOCKED: "Your account is not activated, please contact support",
+        USERNAME_IS_REQUIRED: "Username is required"
     },
     ORDERS: {
         NOT_FOUND: "Order could not be found",

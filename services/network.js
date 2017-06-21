@@ -6,5 +6,5 @@ module.exports = {
 };
 
 function getHostName() {
-    return hostName = config.HOST_NAME;
+    return hostName = process.env.HOST || config.HOST_NAME;
 }

@@ -1,28 +1,39 @@
 var bcrypt = require('bcryptjs');
-var Promise = require('promise');
-
-function genSalt(callback) {
-    bcrypt.genSalt(callback);
+async function genSalt(callback) {
+    return new Promise((resolve, reject) => {
+        bcrypt.genSalt(function (err, salt) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(salt)
+        });
+    });
 }
 
-function hashWithSalt(myPlaintextPassword, salt, callback) {
-    bcrypt.hash(myPlaintextPassword, salt, callback);
+async function hashWithSalt(myPlaintextPassword, salt) {
+    return new Promise((resolve, reject) => {
+        bcrypt.hash(myPlaintextPassword, salt, function (err, hash) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(hash);
+        });
+    })
 }
 
 // function comparePassword(myPlaintextPassword, password, callback) {
 //     bcrypt.compare(myPlaintextPassword, password, callback);
 // }
 
-function comparePassword(myPlaintextPassword, password) {
- return new Promise(function(resolve, reject) {
-    bcrypt.compare(myPlaintextPassword, password, function(err, res) {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(res);
-        }
-    })
-})
+async function comparePassword(myPlaintextPassword, password) {
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(myPlaintextPassword, password, function (err, res) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(res);
+        });
+    });
 }
 
 
